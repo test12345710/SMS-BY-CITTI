@@ -1,4 +1,6 @@
 package com.citti.model;
 
-public class Absence {
-}
+import java.time.LocalDate;
+
+
+public record Absence(LocalDate date, Teacher teacher) {}

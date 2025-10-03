@@ -1,4 +1,6 @@
 package com.citti.model;
 
-public class Exam {
-}
+import java.time.LocalDate;
+
+
+public record Exam(LocalDate date, String subjectName, Teacher teacher) { }
