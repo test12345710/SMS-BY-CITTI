@@ -21,7 +21,7 @@ public class Student extends User {
 	public List<Grade> getGrades() { return grades; }
 	public Grade getGrade(GRADE_VALUE g, Teacher t) {
 		for (Grade gi : grades) {
-			if (gi.grade().equals(g) && gi.teacher() == t) {
+			if (gi.gradeval.equals(g) && gi.teacher == t) {
 				return gi;
 			}
 		}

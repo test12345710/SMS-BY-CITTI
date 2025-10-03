@@ -6,6 +6,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
 
+import static com.citti.util.Constants.ENTRY_CODE_CHARS;
+import static com.citti.util.Constants.ENTRY_CODE_LENGTH;
+
 
 public class SecurityUtil {
 
@@ -17,14 +20,11 @@ public class SecurityUtil {
 	}
 
 	public static String generateEntryCode() {
-		String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-		int length = 4;
-
 		SecureRandom random = new SecureRandom();
-		StringBuilder sb = new StringBuilder(length);
+		StringBuilder sb = new StringBuilder(ENTRY_CODE_LENGTH);
 
-		for (int i = 0; i < length; i++) {
-			sb.append(chars.charAt(random.nextInt(chars.length())));
+		for (int i = 0; i < ENTRY_CODE_LENGTH; i++) {
+			sb.append(ENTRY_CODE_CHARS.charAt(random.nextInt(ENTRY_CODE_CHARS.length())));
 		}
 		return sb.toString();
 	}
@@ -39,7 +39,6 @@ public class SecurityUtil {
 		}
 	}
 
-	// Verify that input + salt matches stored hash
 	public static boolean verifyHash(String input, String storedHash, String salt) {
 		String computedHash = hash(input + salt);
 		return computedHash.equals(storedHash);

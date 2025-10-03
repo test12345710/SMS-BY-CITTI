@@ -15,12 +15,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.citti.util.Constants.USERS_FILE;
+
 
 public class UsersDAO {
 
 	private static final UsersDAO instance = new UsersDAO();
 	private Map<String, User> users = new HashMap<>();
-	private static final String FILE_PATH = "data/users.json";
+	private static final String FILE_PATH = USERS_FILE;
 
 	public UsersDAO() {
 		loadFromFile();
@@ -44,16 +46,13 @@ public class UsersDAO {
 				map.put(u.getFullName(), u);
 			}
 		} catch (Exception e) { e.printStackTrace(); }
-		if (map != null) users = map;
+		users = map;
 	}
 
-	public void addUserToDAO(User user, Role role, String entryCode) {
-		String salt = SecurityUtil.generateSalt();
-		String hash = SecurityUtil.hash(entryCode + salt);
-		LoginInfo loginInfo = new LoginInfo(hash, salt);
-
+	public void addUserToDAO(User user) {
 		User userToStore;
-
+		LoginInfo loginInfo = user.getLoginInfo();
+		Role role = user.getRole();
 		switch (role) {
 			case ADMIN -> userToStore = new Admin(user.getFirstName(), user.getLastName(), role, loginInfo);
 			case STUDENT -> userToStore = new Student(user.getFirstName(), user.getLastName(), role, loginInfo);
@@ -62,7 +61,6 @@ public class UsersDAO {
 			default -> throw new IllegalArgumentException("Invalid role: " + role);
 		}
 
-		System.out.println(userToStore);
 		users.put(user.getFullName(), userToStore);
 	}
 

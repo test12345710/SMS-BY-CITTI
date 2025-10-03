@@ -8,63 +8,103 @@ import com.citti.dataAccessObj.UsersDAO;
 import com.citti.model.*;
 import com.citti.util.Constants.LOGINSTATE;
 import com.citti.util.Constants.Role;
-import com.citti.auth.FirstRunCheck;
 import com.citti.util.InputUtil;
 import com.citti.util.LoginInfo;
 
+import static com.citti.util.Constants.*;
+import static java.lang.Thread.sleep;
 
+
+@SuppressWarnings("BusyWait")
 public class Main {
+
+	public static void loading(int seconds, String messageAfter, boolean showMessage) throws InterruptedException {
+		long end = System.currentTimeMillis() + seconds * 1000L;
+		int dots = 1;
+
+		while (System.currentTimeMillis() < end) {
+			System.out.print("\r" + ".".repeat(dots));
+			dots = (dots % 5) + 1;
+			sleep(500);
+		}
+		if (showMessage) {
+			System.out.println("\r" + messageAfter);
+		} else {
+			System.out.println();
+		}
+
+	}
+
 	public static void main(String[] args) {
 
-		// Initialize DAOs
 		UsersDAO usersDAO = UsersDAO.getInstance();
 		GradesDAO gradesDAO = GradesDAO.getInstance();
 		AbsencesDAO absencesDAO = AbsencesDAO.getInstance();
 		ExamsDAO examsDAO = ExamsDAO.getInstance();
 
-		// Initialize AuthService
+		usersDAO.loadFromFile();
+		gradesDAO.loadFromFile();
+		absencesDAO.loadFromFile();
+		examsDAO.loadFromFile();
+
 		AuthService authService = new AuthService(usersDAO);
 
-		// Initialize Controller (services will be set per-user)
 		AppController appController = new AppController(usersDAO, gradesDAO, absencesDAO, examsDAO, authService);
 
 		while (true) {
-			System.out.println("Saving..");
-			AbsencesDAO.getInstance().saveToFile();
-			ExamsDAO.getInstance().saveToFile();
-			GradesDAO.getInstance().saveToFile();
-			UsersDAO.getInstance().saveToFile();
 			try {
-				System.out.println("=== Student Management System ===");
-				if (FirstRunCheck.isFirstRun()) {
-					String fullName = InputUtil.readInput("Enter full name: ");
-					int roleIndex = InputUtil.readInt("Enter role index (0 if unknown): ", 0,999);
+				System.out.println("=== " + APP_NAME + " ===");
+				String fullName = InputUtil.readInput(TYPE_FULL_NAME_PROMPT);
 
-					Role role = switch (roleIndex) {
-						case 69 -> Role.ADMIN;
-						case 300 -> Role.TEACHER;
-						case 150 -> Role.PRINCIPAL;
-						default -> Role.STUDENT;
-					};
+				if (usersDAO.findUserInDAO(fullName) == null) { // new user
+					System.out.println("Welcome " + fullName + " to our platform!");
 
-					// first, last, role
-					String entryCode = authService.register(new User(fullName.split(" ")[0], fullName.split(" ")[1], role, new LoginInfo("", "")), role);
+					Role role = Role.STUDENT;
+					String entryCode;
+					String fullNameClean = "EMPTY";
+					if (fullName.contains("_")) {
+						fullNameClean = fullName.split("_")[0];
+						role = switch (fullName.split("_")[1]) {
+							case "ADMIN" -> Role.ADMIN;
+							case "TEACHER" -> Role.TEACHER;
+							case "PRINCIPAL" -> Role.PRINCIPAL;
+							default -> Role.STUDENT;
+						};
+						entryCode = authService.register(new User(fullNameClean.split(" ")[0], fullNameClean.split(" ")[1], role,
+								new LoginInfo("", "")));
+					} else {
+						entryCode = authService.register(new User(fullName.split(" ")[0], fullName.split(" ")[1], role,
+								new LoginInfo("", "")));
+					}
 
-					System.out.println("Registered successfully! ");
-					System.out.println("Entry code: " + entryCode + " DON'T FORGET!");
+					sleep(500);
+					loading(5, "You have been registered successfully!", false);
+					sleep(1800);
+					System.out.println("\nYour assigned entry code is:\n " + entryCode + " \nKeep it somewhere safe and do not forget it!!!\n");
 					UsersDAO.getInstance().saveToFile();
-				} else {
-						String fullName = InputUtil.readInput("Enter full name: ");
-						String entryCode = InputUtil.readInput("Enter entry code: ");
+					System.out.println("Press any key to continue...");
+					//noinspection ResultOfMethodCallIgnored
+					System.in.read(); // f35r, VA5h
 
-						if (authService.login(fullName, entryCode) == LOGINSTATE.SUCCESS) {
+					User loggedInUser = usersDAO.findUserInDAO(fullNameClean);
+					appController.routeUser(loggedInUser);
+				} else { // existing user
+						String entryCode = InputUtil.readInput(TYPE_ENTRY_CODE_PROMPT);
 
-							User loggedInUser = usersDAO.findUserInDAO(fullName);
-							appController.routeUser(loggedInUser);
+						boolean success = authService.login(fullName, entryCode) == LOGINSTATE.SUCCESS;
 
-						} else {
-							System.out.println("Invalid credentials. Try again.");
-						}
+					sleep(500);
+					if (success) {
+						loading(2, "", false);
+					} else {
+						loading(2, INVALID_CREDENTIALS, true);
+						continue;
+					}
+					sleep(250);
+
+
+					User loggedInUser = usersDAO.findUserInDAO(fullName);
+					appController.routeUser(loggedInUser);
 				}
 
 			} catch (Exception e) {

@@ -1,49 +1,19 @@
 {
   "0": [
     {
-      "grade": "A",
+      "gradeval": "F",
       "teacher": {
-        "id": -69,
-        "firstName": "John",
-        "lastName": "Doe",
-        "role": "TEACHER",
-        "loginInfo": {
-          "hash": "john",
-          "salt": "123"
-        }
-      },
-      "subjectName": "Math",
-      "date": "2025-10-03"
-    },
-    {
-      "grade": "F",
-      "teacher": {
-        "id": 1,
+        "id": 0,
         "firstName": "Citti",
         "lastName": "Dabozoo",
         "role": "TEACHER",
         "loginInfo": {
-          "hash": "df+ES4gPujycfd3HbYeznqXdn1EI4jE9EgS8rLKdBVY\u003d",
-          "salt": "wEYkJbKaj8HGPjoXOlt6/g\u003d\u003d"
+          "hash": "IW9mH42mDJR6zEw9bbGhZahF+qbM8FAzStVvePDmfrQ\u003d",
+          "salt": "llOBapu4MIYC0o9V+SyFfQ\u003d\u003d"
         }
       },
       "subjectName": "PE",
-      "date": "2025-03-11"
-    },
-    {
-      "grade": "F",
-      "teacher": {
-        "id": 1,
-        "firstName": "Citti",
-        "lastName": "Dabozoo",
-        "role": "TEACHER",
-        "loginInfo": {
-          "hash": "df+ES4gPujycfd3HbYeznqXdn1EI4jE9EgS8rLKdBVY\u003d",
-          "salt": "wEYkJbKaj8HGPjoXOlt6/g\u003d\u003d"
-        }
-      },
-      "subjectName": "PE",
-      "date": "2025-03-11"
+      "date": "2025-12-31"
     }
   ]
 }

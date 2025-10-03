@@ -10,13 +10,13 @@ import com.citti.service.*;
 import com.citti.util.Constants.GRADE_VALUE;
 import com.citti.util.Constants.Role;
 import com.citti.util.InputUtil;
+import com.citti.util.InvalidInputError;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
-import static com.citti.util.Constants.toGrade;
-import static com.citti.util.InputUtil.parseDate;
+import static com.citti.util.Constants.*;
 import static com.citti.util.InputUtil.readInput;
 
 public record AppController(
@@ -27,13 +27,20 @@ public record AppController(
 		AuthService authService
 ) {
 
+	private void saveDAOs() {
+		usersDAO.saveToFile();
+		gradesDAO.saveToFile();
+		absencesDAO.saveToFile();
+		examsDAO.saveToFile();
+	}
+
 	public void routeUser(User user) {
 		switch (user.getRole()) {
 			case STUDENT -> handleStudent((Student) user);
 			case TEACHER -> handleTeacher((Teacher) user);
 			case ADMIN -> handleAdmin((Admin) user);
 			case PRINCIPAL -> handlePrincipal((Principal) user);
-			default -> System.out.println("Unknown role. Cannot route user.");
+			default -> System.out.println(INVALID_ROLE);
 		}
 	}
 
@@ -44,14 +51,15 @@ public record AppController(
 
 		while (true) {
 			printMenu("Student Menu", "View Grades", "View Absences", "View Upcoming Exams", "Logout");
-			int choice = InputUtil.readInt("Enter your choice: ", 1, 4);
+			int choice = InputUtil.readInt(TYPE_CHOICE_PROMPT, 1, 4);
 
 			switch (choice) {
 				case 1 -> printGrades(service.getGrades());
 				case 2 -> printAbsences(service.getAbsences());
 				case 3 -> printExams(service.getUpcomingExams());
-				case 4 -> { System.out.println("Logging out..."); return; }
+				case 4 -> { System.out.println(LOGGING_OUT); return; }
 			}
+			saveDAOs();
 		}
 	}
 
@@ -62,7 +70,7 @@ public record AppController(
 
 		while (true) {
 			printMenu("Teacher Menu", "Assign Grade", "Add Absence", "Announce Exam", "Remove Grade", "Cancel Exam", "Logout");
-			int choice = InputUtil.readInt("Enter your choice: ", 1, 6);
+			int choice = InputUtil.readInt(TYPE_CHOICE_PROMPT, 1, 6);
 
 			switch (choice) {
 				case 1 -> assignGrade(service, teacher);
@@ -70,8 +78,10 @@ public record AppController(
 				case 3 -> announceExam(service, teacher);
 				case 4 -> removeGrade(service, teacher);
 				case 5 -> cancelExam(service, teacher);
-				case 6 -> { System.out.println("Logging out..."); return; }
+				case 6 -> { System.out.println(LOGGING_OUT); return; }
 			}
+
+			saveDAOs();
 		}
 	}
 
@@ -82,7 +92,7 @@ public record AppController(
 
 		while (true) {
 			printMenu("Admin Menu", "Fire Teacher", "Expel Student", "Modify Grade", "Revoke Absence", "Change Entry Code", "Logout");
-			int choice = InputUtil.readInt("Enter your choice: ", 1, 6);
+			int choice = InputUtil.readInt(TYPE_CHOICE_PROMPT, 1, 6);
 
 			switch (choice) {
 				case 1 -> fireTeacher(service);
@@ -90,8 +100,10 @@ public record AppController(
 				case 3 -> modifyGrade(service);
 				case 4 -> revokeAbsence(service);
 				case 5 -> changeEntryCode(service);
-				case 6 -> { System.out.println("Logging out..."); return; }
+				case 6 -> { System.out.println(LOGGING_OUT); return; }
 			}
+
+			saveDAOs();
 		}
 	}
 
@@ -107,7 +119,7 @@ public record AppController(
 					"View All Exams", "Logout"
 			);
 
-			int choice = InputUtil.readInt("Enter your choice: ", 1, 10);
+			int choice = InputUtil.readInt(TYPE_CHOICE_PROMPT, 1, 10);
 
 			switch (choice) {
 				case 1 -> fireTeacher(service);
@@ -119,8 +131,10 @@ public record AppController(
 				case 7 -> viewAllGrades(service);
 				case 8 -> viewAllAbsences(service);
 				case 9 -> viewAllExams(service);
-				case 10 -> { System.out.println("Logging out..."); return; }
+				case 10 -> { System.out.println(LOGGING_OUT); return; }
 			}
+
+			saveDAOs();
 		}
 	}
 
@@ -133,46 +147,79 @@ public record AppController(
 		}
 	}
 
+
 	private void printGrades(List<Grade> grades) {
-		if (grades.isEmpty()) System.out.println("No grades available.");
-		else grades.forEach(g -> System.out.println(g.subjectName() + ": " + g.grade()));
+		if (grades.isEmpty()) System.out.println(NO_GRADES);
+		else grades.forEach(g -> System.out.println(g.subjectName + ": " + g.gradeval));
 	}
 
 	private void printAbsences(List<Absence> absences) {
-		if (absences.isEmpty()) System.out.println("No absences.");
-		else absences.forEach(a -> System.out.println("On " + a.date() + " from " + a.teacher()));
+		if (absences.isEmpty()) System.out.println(NO_ABSENCES);
+		else absences.forEach(a -> System.out.println("On " + a.date + " from " + a.teacher.getLastName()));
 	}
 
 	private void printExams(List<Exam> exams) {
-		if (exams.isEmpty()) System.out.println("No upcoming exams.");
-		else exams.forEach(e -> System.out.println("On " + e.date() + " with " + e.teacher()));
+		if (exams.isEmpty()) System.out.println(NO_EXAMS);
+		else exams.forEach(e -> System.out.println("On " + e.date + " with " + e.teacher.getLastName()));
+	}
+
+
+	private User readUser(String prompt) {
+		String input = readInput(prompt);
+
+		while (usersDAO.findUserInDAO(input) == null) {
+			System.out.println(INVALID_USER_NAME);
+			input = readInput(prompt);
+		}
+		return usersDAO.findUserInDAO(input);
 	}
 
 	private Student readStudent() {
-		return (Student) usersDAO.findUserInDAO(readInput("Enter student name: "));
+		User user = readUser(TYPE_STUDENT_NAME_PROMPT);
+		while (!(user instanceof Student)) {
+			System.out.println(INVALID_ROLE);
+			user = readUser(TYPE_STUDENT_NAME_PROMPT);
+		}
+		return (Student) user;
 	}
 
 	private Teacher readTeacher() {
-		return (Teacher) usersDAO.findUserInDAO(readInput("Enter teacher name: "));
+		User user = readUser(TYPE_TEACHER_NAME_PROMPT);
+		while (!(user instanceof Teacher)) {
+			System.out.println(INVALID_ROLE);
+			user = readUser(TYPE_TEACHER_NAME_PROMPT);
+		}
+		return (Teacher) user;
 	}
 
 	private LocalDate readDate() {
 		while (true) {
 			try {
-				return parseDate(readInput("Enter date (yyyy-MM-dd): "));
-			} catch (Exception e) {
-				System.out.println("Invalid date. Try again.");
+				return InputUtil.readDate(TYPE_DATE_PROMPT);
+			} catch (InvalidInputError e) {
+				System.out.println(INVALID_DATE);
 			}
-		} // bG1f
+		}
+	}
+
+	private String readSubject() {
+		return readInput(TYPE_SUBJECT_NAME_PROMPT);
+	}
+
+	private Grade readGrade(Teacher teacher) {
+		try {
+			return toGrade(readInput(TYPE_GRADE_PROMPT), teacher, readSubject(), readDate());
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	// ==================== TEACHER ACTIONS ====================
 	private void assignGrade(TeacherService service, Teacher teacher) {
 		Student student = readStudent();
-		LocalDate date = readDate();
-		Grade grade = toGrade(readInput("Enter grade: "), teacher, readInput("Enter subject name: "), date);
+		Grade grade = readGrade(teacher);
 		service.assignGrade(student, grade);
-		System.out.println("Grade " + grade.grade() + " assigned to " + student.getFullName());
+		System.out.println("Grade " + grade.gradeval + " assigned to " + student.getFullName());
 	}
 
 	private void addAbsence(TeacherService service, Teacher teacher) {
@@ -186,22 +233,21 @@ public record AppController(
 	private void announceExam(TeacherService service, Teacher teacher) {
 		Student student = readStudent();
 		LocalDate date = readDate();
-		Exam exam = new Exam(date, readInput("Enter subject name: "), teacher);
+		Exam exam = new Exam(date, readSubject(), teacher);
 		service.announceExam(student, exam);
 		System.out.println("Exam announced for " + student.getFullName());
 	}
 
 	private void removeGrade(TeacherService service, Teacher teacher) {
 		Student student = readStudent();
-		LocalDate date = readDate();
-		Grade grade = new Grade(GRADE_VALUE.valueOf(readInput("Enter grade: ")), teacher, readInput("Enter subject name: "), date);
+		Grade grade = readGrade(teacher);
 		service.removeGrade(student, grade);
 		System.out.println("Grade removed from " + student.getFullName());
 	}
 
 	private void cancelExam(TeacherService service, Teacher teacher) {
 		Student student = readStudent();
-		Exam exam = new Exam(readDate(), readInput("Enter subject name: "), teacher);
+		Exam exam = new Exam(readDate(), readSubject(), teacher);
 		service.cancelExam(student, exam);
 		System.out.println("Exam cancelled for " + student.getFullName());
 	}
@@ -228,15 +274,15 @@ public record AppController(
 	private void modifyGrade(Object service) {
 		Student student = readStudent();
 		Teacher teacher = readTeacher();
-		GRADE_VALUE oldGrade = GRADE_VALUE.valueOf(readInput("Enter old grade: "));
-		GRADE_VALUE newGrade = GRADE_VALUE.valueOf(readInput("Enter new grade: "));
+		GRADE_VALUE oldGrade = GRADE_VALUE.valueOf(readInput(TYPE_OLD_GRADE_PROMPT));
+		GRADE_VALUE newGrade = GRADE_VALUE.valueOf(readInput(TYPE_NEW_GRADE_PROMPT));
 		Grade oldGradeObj = student.getGrade(oldGrade, teacher);
 		if (service instanceof AdminService adminService) {
 			adminService.changeStudentGrade(student, oldGradeObj,
-					new Grade(newGrade, teacher, oldGradeObj.subjectName(), oldGradeObj.date()));
+					new Grade(newGrade, teacher, oldGradeObj.subjectName, oldGradeObj.date));
 		} else if (service instanceof PrincipalService principalService) {
 			principalService.changeStudentGrade(student, oldGradeObj,
-					new Grade(newGrade, teacher, oldGradeObj.subjectName(), oldGradeObj.date()));
+					new Grade(newGrade, teacher, oldGradeObj.subjectName, oldGradeObj.date));
 		}
 	}
 
@@ -274,7 +320,7 @@ public record AppController(
 		Map<Student, List<Grade>> grades = service.getAllGrades();
 		grades.forEach((s, gList) -> {
 			System.out.println(s.getFullName() + ": ");
-			gList.forEach(g -> System.out.println("   " + g.subjectName() + ": " + g.grade()));
+			gList.forEach(g -> System.out.println("   " + g.subjectName + ": " + g.gradeval));
 		});
 	}
 
@@ -282,7 +328,7 @@ public record AppController(
 		Map<Student, List<Absence>> absences = service.getAllAbsences();
 		absences.forEach((s, aList) -> {
 			System.out.println(s.getFullName() + ": ");
-			aList.forEach(a -> System.out.println("   " + a.date() + " from " + a.teacher()));
+			aList.forEach(a -> System.out.println("   " + a.date + " from " + a.teacher));
 		});
 	}
 
@@ -290,7 +336,7 @@ public record AppController(
 		Map<Student, List<Exam>> exams = service.getAllUpcomingExams();
 		exams.forEach((s, eList) -> {
 			System.out.println(s.getFullName() + ": ");
-			eList.forEach(e -> System.out.println("   " + e.date() + " with " + e.teacher()));
+			eList.forEach(e -> System.out.println("   " + e.date + " with " + e.teacher));
 		});
 	}
 }
