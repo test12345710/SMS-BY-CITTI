@@ -3,4 +3,13 @@ package com.citti.model;
 import java.time.LocalDate;
 
 
-public record Absence(LocalDate date, Teacher teacher) {}
+public class Absence {
+
+	public LocalDate date;
+	public Teacher teacher;
+
+	public Absence(LocalDate date, Teacher teacher) {
+		this.date = date;
+		this.teacher = teacher;
+	}
+}

@@ -16,46 +16,35 @@ public class InputUtil {
 	}
 
 	public static int readInt(String prompt, int min, int max) {
-		System.out.print(prompt);
-		int choice;
-		try {
-			choice = Integer.parseInt(sc.nextLine().trim());
-			if (choice >= min && choice <= max) {
-				return choice;
-			} else {
-				return INVALID_INPUT;
+		while (true) {
+			System.out.print(prompt);
+
+			try {
+				int choice = Integer.parseInt(sc.nextLine().trim());
+				if (choice >= min && choice <= max) {
+					return choice;
+				} else {
+					System.out.println("Invalid input. Please enter a number between " + min + " and " + max + ".");
+				}
+			} catch (NumberFormatException e) {
+				System.out.println("Invalid input. Please enter a number between " + min + " and " + max + ".");
 			}
-		} catch (NumberFormatException e) {
-			return INVALID_INPUT;
 		}
 	}
 
-	public static LocalDate parseDate(String input) {
+	public static LocalDate parseDate(String input) throws InvalidInputError {
 		try {
 			if (input == null || input.trim().isEmpty()) {
-				return INVALID_DATE;
+				throw new InvalidInputError();
 			}
 			return LocalDate.parse(input.trim(), DATE_FORMATTER);
 		} catch (DateTimeParseException e) {
-			return INVALID_DATE;
+			throw new InvalidInputError();
 		}
 	}
 	
-	public static LocalDate readDate(String prompt) {
-		while (true) {
-			try {
-				String input = readInput(prompt);
-				if (input.trim().isEmpty()) {
-					return INVALID_DATE;
-				}
-				LocalDate date = parseDate(input);
-				if (date != INVALID_DATE) {
-					return date;
-				}
-			} catch (Exception e) {
-				return INVALID_DATE;
-			}
-		}
+	public static LocalDate readDate(String prompt) throws InvalidInputError {
+		return parseDate(readInput(prompt));
 	}
 }
 

@@ -1,11 +1,7 @@
 package com.citti.dataAccessObj;
 
-import com.citti.model.Absence;
-import com.citti.model.Student;
-import com.citti.model.Teacher;
-import com.citti.util.Constants.Role;
+import com.citti.model.*;
 import com.citti.util.LocalDateAdapter;
-import com.citti.util.LoginInfo;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -19,19 +15,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.citti.util.Constants.ABSENCES_FILE;
+
 
 public class AbsencesDAO {
 
 	private static final AbsencesDAO instance = new AbsencesDAO();
 	private Map<Integer, List<Absence>> absences = new HashMap<>();
-	private static final String FILE_PATH = "data/absences.json";
+	private static final String FILE_PATH = ABSENCES_FILE;
 
 	private final Gson gson = new GsonBuilder().registerTypeAdapter(LocalDate.class, new LocalDateAdapter()).setPrettyPrinting().create();
 
 	public AbsencesDAO() {
 		loadFromFile();
-		addAbsenceToDAO((Student) UsersDAO.getInstance().findUserInDAO("Citti Dabozo"), new Absence(LocalDate.now(), new Teacher("John", "Doe", Role.TEACHER,
-				new LoginInfo("john", "123"))));
 	}
 
 	public void saveToFile() {
@@ -50,6 +46,22 @@ public class AbsencesDAO {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
+		for (User user : UsersDAO.getInstance().getAllUsers()) {
+			if (user instanceof Student student) {
+				if (absences.containsKey(student.getId())) {
+					if (!absences.isEmpty()) {
+						for (Absence absence_ : student.getAbsences()) {
+							student.removeAbsence(absence_);
+						}
+						for (Absence absence : absences.get(student.getId())) {
+							student.addAbsence(absence);
+						}
+					}
+				}
+			}
+		}
+
 	}
 
 
@@ -61,7 +73,7 @@ public class AbsencesDAO {
 
 	public void removeAbsenceFromDAO(Student student, Absence absence) {
 		student.removeAbsence(absence);
-		absences.remove(student.getId());
+		absences.get(student.getId()).remove(absence);
 	}
 
 	public List<Absence> getAbsencesForStudent(Student student) {

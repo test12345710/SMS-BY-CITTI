@@ -2,11 +2,8 @@ package com.citti.dataAccessObj;
 
 import com.citti.model.Grade;
 import com.citti.model.Student;
-import com.citti.model.Teacher;
-import com.citti.util.Constants.GRADE_VALUE;
-import com.citti.util.Constants.Role;
+import com.citti.model.User;
 import com.citti.util.LocalDateAdapter;
-import com.citti.util.LoginInfo;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -20,21 +17,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.citti.util.Constants.GRADES_FILE;
+
 
 public class GradesDAO {
 
 	private static final GradesDAO instance = new GradesDAO();
 	private Map<Integer, List<Grade>> grades = new HashMap<>();
-	private static final String FILE_PATH = "data/grades.json";
+	private static final String FILE_PATH = GRADES_FILE;
 
 	private final Gson gson = new GsonBuilder().registerTypeAdapter(LocalDate.class, new LocalDateAdapter()).setPrettyPrinting().create();
 
 	public GradesDAO() {
 		loadFromFile();
-
-		addGradeToDAO((Student) UsersDAO.getInstance().findUserInDAO("Citti Dabozo"), new Grade(GRADE_VALUE.A, new Teacher("John", "Doe",
-				Role.TEACHER,
-				new LoginInfo("john", "123")), "Math", LocalDate.now()));
 	}
 
 	public void saveToFile() {
@@ -53,6 +48,21 @@ public class GradesDAO {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
+		for (User user : UsersDAO.getInstance().getAllUsers()) {
+			if (user instanceof Student student) {
+				if (grades.containsKey(student.getId())) {
+					if (!grades.isEmpty()) {
+						for (Grade grade_ : student.getGrades()) {
+							student.removeGrade(grade_);
+						}
+						for (Grade grade : grades.get(student.getId())) {
+							student.addGrade(grade);
+						}
+					}
+				}
+			}
+		}
 	}
 
 	public void addGradeToDAO(Student student, Grade grade) {
@@ -61,8 +71,11 @@ public class GradesDAO {
 	}
 
 	public void removeGradeFromDAO(Student student, Grade grade) {
-		student.removeGrade(grade);
-		grades.remove(student.getId());
+		student.getGrades().remove(grade);
+		grades.get(student.getId()).remove(grade);
+
+		System.out.println(grades.get(student.getId()));
+		System.out.println(student.getGrades());
 	}
 
 	public List<Grade> getGradesForStudent(Student student) {

@@ -1,11 +1,7 @@
 package com.citti.dataAccessObj;
 
-import com.citti.model.Exam;
-import com.citti.model.Student;
-import com.citti.model.Teacher;
-import com.citti.util.Constants.Role;
+import com.citti.model.*;
 import com.citti.util.LocalDateAdapter;
-import com.citti.util.LoginInfo;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -19,19 +15,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.citti.util.Constants.EXAMS_FILE;
+
 
 public class ExamsDAO {
 
 	private static final ExamsDAO instance = new ExamsDAO();
 	private Map<Integer, List<Exam>> exams = new HashMap<>();
-	private static final String FILE_PATH = "data/exams.json";
+	private static final String FILE_PATH = EXAMS_FILE;
 
 	private final Gson gson = new GsonBuilder().registerTypeAdapter(LocalDate.class, new LocalDateAdapter()).setPrettyPrinting().create();
 
 	public ExamsDAO() {
 		loadFromFile();
-		addExamToDAO((Student) UsersDAO.getInstance().findUserInDAO("Citti Dabozo"), new Exam(LocalDate.now(), "Math", new Teacher("John", "Doe", Role.TEACHER,
-				new LoginInfo("john", "123"))));
 	}
 
 	public void saveToFile() {
@@ -50,6 +46,21 @@ public class ExamsDAO {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
+		for (User user : UsersDAO.getInstance().getAllUsers()) {
+			if (user instanceof Student student) {
+				if (exams.containsKey(student.getId())) {
+					if (!exams.get(student.getId()).isEmpty()) {
+						for (Exam exam_ : student.getUpcomingExams()) {
+							student.removeUpcomingExam(exam_);
+						}
+						for (Exam exam : exams.get(student.getId())) {
+							student.addUpcomingExam(exam);
+						}
+					}
+				}
+			}
+		}
 	}
 
 	public void addExamToDAO(Student student, Exam exam) {
@@ -59,7 +70,7 @@ public class ExamsDAO {
 
 	public void removeExamFromDAO(Student student, Exam exam) {
 		student.removeUpcomingExam(exam);
-		exams.remove(student.getId());
+		exams.get(student.getId()).remove(exam);
 	}
 
 	public List<Exam> getExamsForStudent(Student student) {

@@ -1,17 +1,1 @@
-{
-  "0": [
-    {
-      "date": "2025-10-03",
-      "teacher": {
-        "id": 0,
-        "firstName": "John",
-        "lastName": "Doe",
-        "role": "TEACHER",
-        "loginInfo": {
-          "hash": "john",
-          "salt": "123"
-        }
-      }
-    }
-  ]
-}
+{}
