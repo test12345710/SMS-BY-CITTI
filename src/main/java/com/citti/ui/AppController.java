@@ -1,5 +1,6 @@
-package com.citti.controller;
+package com.citti.ui;
 
+import com.citti.auth.AuthService;
 import com.citti.dataAccessObj.AbsencesDAO;
 import com.citti.dataAccessObj.ExamsDAO;
 import com.citti.dataAccessObj.GradesDAO;

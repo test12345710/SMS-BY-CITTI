@@ -1,15 +1,14 @@
-package com.citti.app;
+package com.citti.ui;
 
-import com.citti.controller.AppController;
+import com.citti.auth.AuthService;
 import com.citti.dataAccessObj.AbsencesDAO;
 import com.citti.dataAccessObj.ExamsDAO;
 import com.citti.dataAccessObj.GradesDAO;
 import com.citti.dataAccessObj.UsersDAO;
 import com.citti.model.*;
-import com.citti.service.*;
 import com.citti.util.Constants.LOGINSTATE;
 import com.citti.util.Constants.Role;
-import com.citti.util.FirstRunCheck;
+import com.citti.auth.FirstRunCheck;
 import com.citti.util.InputUtil;
 import com.citti.util.LoginInfo;
 

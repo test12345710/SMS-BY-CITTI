@@ -1,10 +1,9 @@
-package com.citti.service;
+package com.citti.auth;
 
 import com.citti.dataAccessObj.UsersDAO;
 import com.citti.model.User;
 import com.citti.util.Constants.LOGINSTATE;
 import com.citti.util.Constants.Role;
-import com.citti.util.SecurityUtil;
 
 
 public record AuthService(UsersDAO usersDAO) {

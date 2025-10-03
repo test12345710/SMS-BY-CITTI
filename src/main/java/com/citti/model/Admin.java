@@ -5,7 +5,7 @@ import com.citti.dataAccessObj.GradesDAO;
 import com.citti.dataAccessObj.UsersDAO;
 import com.citti.util.Constants.Role;
 import com.citti.util.LoginInfo;
-import com.citti.util.SecurityUtil;
+import com.citti.auth.SecurityUtil;
 
 
 public class Admin extends User {

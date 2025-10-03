@@ -1,4 +1,4 @@
-package com.citti.util;
+package com.citti.auth;
 
 import java.io.File;
 

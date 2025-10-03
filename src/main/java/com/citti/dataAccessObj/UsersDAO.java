@@ -3,7 +3,7 @@ package com.citti.dataAccessObj;
 import com.citti.model.*;
 import com.citti.util.Constants.Role;
 import com.citti.util.LoginInfo;
-import com.citti.util.SecurityUtil;
+import com.citti.auth.SecurityUtil;
 import com.citti.util.UserWrapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
