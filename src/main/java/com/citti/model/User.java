@@ -5,14 +5,13 @@ import com.citti.util.LoginInfo;
 
 
 public class User {
-	private final int id;
+	private int id = 0;
 	private final String firstName;
 	private final String lastName;
 	private Role role;
 	private LoginInfo loginInfo;
 
-	public User(int id, String firstName, String lastName, Role role, LoginInfo loginInfo) {
-		this.id = id;
+	public User(String firstName, String lastName, Role role, LoginInfo loginInfo) {
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.role = role;
@@ -26,6 +25,7 @@ public class User {
 	public Role getRole() { return role; }
 	public LoginInfo getLoginInfo() { return loginInfo; }
 
+	public void assignID(int id) { this.id = id; }
 	public void setRole(Role newRole) { this.role = newRole; }
 	public void setLoginInfo(LoginInfo loginInfo) { this.loginInfo = loginInfo; }
 }

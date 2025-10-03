@@ -9,6 +9,8 @@ import java.util.Map;
 
 
 public class ExamsDAO {
+
+	private static final ExamsDAO instance = new ExamsDAO();
 	private final Map<Student, List<Exam>> exams = new HashMap<>();
 
 	public void addExamToDAO(Student student, Exam exam) {
@@ -23,5 +25,9 @@ public class ExamsDAO {
 
 	public List<Exam> getExamsForStudent(Student student) {
 		return exams.get(student);
+	}
+
+	public static ExamsDAO getInstance() {
+		return instance;
 	}
 }

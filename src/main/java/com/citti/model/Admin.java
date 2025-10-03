@@ -9,28 +9,17 @@ import com.citti.util.SecurityUtil;
 
 
 public class Admin extends User {
-	private final GradesDAO gradesDAO;
-	private final AbsencesDAO absencesDAO;
-	private final UsersDAO usersDAO;
 
-	public Admin(int id, String firstName, String lastName, Role role, LoginInfo loginInfo,
-	             GradesDAO gradesDAO, AbsencesDAO absencesDAO, UsersDAO usersDAO) {
-		super(id, firstName, lastName, role, loginInfo);
-		this.gradesDAO = gradesDAO;
-		this.absencesDAO = absencesDAO;
-		this.usersDAO = usersDAO;
-	}
+	private final UsersDAO usersDAO = UsersDAO.getInstance();
+	private final GradesDAO gradesDAO = GradesDAO.getInstance();
+	private final AbsencesDAO absencesDAO = AbsencesDAO.getInstance();
 
-	public void hireTeacher(Teacher teacher) {
-		usersDAO.addUserToDAO(teacher);
+	public Admin(String firstName, String lastName, Role role, LoginInfo loginInfo) {
+		super(firstName, lastName, role, loginInfo);
 	}
 
 	public void fireTeacher(Teacher teacher) {
 		usersDAO.removeUserFromDAO(teacher);
-	}
-
-	public void enrollStudent(Student student) {
-		usersDAO.addUserToDAO(student);
 	}
 
 	public void expelStudent(Student student) {
@@ -45,8 +34,10 @@ public class Admin extends User {
 		absencesDAO.removeAbsenceFromDAO(student, absence);
 	}
 
-	public void changeEntryCode(Student student) {
-		usersDAO.updateEntryCode(student.getFullName(), SecurityUtil.generateEntryCode());
+	public String changeEntryCode(Student student) {
+		String newEntryCode = SecurityUtil.generateEntryCode();
+		usersDAO.updateEntryCode(student.getFullName(), newEntryCode);
+		return newEntryCode;
 	}
 
 

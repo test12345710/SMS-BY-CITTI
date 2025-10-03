@@ -3,6 +3,7 @@ package com.citti.service;
 import com.citti.dataAccessObj.UsersDAO;
 import com.citti.model.User;
 import com.citti.util.Constants.LOGINSTATE;
+import com.citti.util.Constants.Role;
 import com.citti.util.SecurityUtil;
 
 
@@ -17,7 +18,7 @@ public record AuthService(UsersDAO usersDAO) {
 		return LOGINSTATE.FAILURE;
 	}
 
-	public String register(User user) {
+	public String register(User user, Role role) {
 		String entryCode;
 		String salt;
 		String hash;
@@ -31,7 +32,8 @@ public record AuthService(UsersDAO usersDAO) {
 		user.getLoginInfo().setSalt(salt);
 		user.getLoginInfo().setHash(hash);
 
-		usersDAO.addUserToDAO(user);
+		user.assignID(usersDAO.getAllUsers().size() + 1);
+		usersDAO.addUserToDAO(user, role, entryCode);
 
 		return entryCode;
 	}
@@ -39,6 +41,7 @@ public record AuthService(UsersDAO usersDAO) {
 	private boolean verifyEntryCode(User user, String inputEntryCode) {
 		String salt = user.getLoginInfo().getSalt();
 		String storedHash = user.getLoginInfo().getHash();
+
 
 		return SecurityUtil.verifyHash(inputEntryCode, storedHash, salt);
 	}

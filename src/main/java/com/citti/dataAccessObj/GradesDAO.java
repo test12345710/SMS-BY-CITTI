@@ -9,6 +9,8 @@ import java.util.Map;
 
 
 public class GradesDAO {
+
+	private static final GradesDAO instance = new GradesDAO();
 	private final Map<Student, List<Grade>> grades = new HashMap<>();
 
 	public void addGradeToDAO(Student student, Grade grade) {
@@ -30,5 +32,9 @@ public class GradesDAO {
 		student.addGrade(newGrade);
 		grades.put(student, student.getGrades());
 
+	}
+
+	public static GradesDAO getInstance() {
+		return instance;
 	}
 }

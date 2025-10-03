@@ -1,7 +1,5 @@
 package com.citti.model;
 
-import com.citti.dataAccessObj.AbsencesDAO;
-import com.citti.dataAccessObj.GradesDAO;
 import com.citti.dataAccessObj.UsersDAO;
 import com.citti.util.Constants.Role;
 import com.citti.util.LoginInfo;
@@ -13,11 +11,10 @@ import java.util.Map;
 
 public class Principal extends Admin {
 
-	private final UsersDAO usersDAO;
+	private final UsersDAO usersDAO = UsersDAO.getInstance();
 
-	public Principal(int id, String firstName, String lastName, Role role, LoginInfo loginInfo, GradesDAO gradesDAO, AbsencesDAO absencesDAO, UsersDAO usersDAO) {
-		super(id, firstName, lastName, role, loginInfo, gradesDAO, absencesDAO, usersDAO);
-		this.usersDAO = usersDAO;
+	public Principal(String firstName, String lastName, Role role, LoginInfo loginInfo) {
+		super(firstName, lastName, role, loginInfo);
 	}
 
 	public Map<Student, List<Grade>> getAllGrades() {
@@ -54,7 +51,7 @@ public class Principal extends Admin {
 
 	}
 
-	public void announceTo(javax.management.relation.Role role, String message) {
+	public void announceTo(Role role, String message) {
 
 	}
 
