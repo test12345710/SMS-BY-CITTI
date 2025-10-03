@@ -30,6 +30,10 @@ public class Main {
 		AppController appController = new AppController(usersDAO, gradesDAO, absencesDAO, examsDAO, authService);
 
 		while (true) {
+			AbsencesDAO.getInstance().saveToFile();
+			ExamsDAO.getInstance().saveToFile();
+			GradesDAO.getInstance().saveToFile();
+			UsersDAO.getInstance().saveToFile();
 			try {
 				System.out.println("=== Student Management System ===");
 				if (FirstRunCheck.isFirstRun()) {

@@ -16,4 +16,12 @@ public record TeacherService(Teacher teacher) {
 	public void announceExam(Student student, Exam exam) {
 		teacher.announceExam(student, exam);
 	}
+
+	public void cancelExam(Student student, Exam exam) {
+		teacher.cancelExam(student, exam);
+	}
+
+	public void removeGrade(Student student, Grade grade) {
+		teacher.removeGrade(student, grade);
+	}
 }

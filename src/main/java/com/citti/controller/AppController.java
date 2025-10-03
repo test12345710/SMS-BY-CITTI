@@ -18,264 +18,278 @@ import static com.citti.util.Constants.toGrade;
 import static com.citti.util.InputUtil.parseDate;
 import static com.citti.util.InputUtil.readInput;
 
-
-public record AppController(UsersDAO usersDAO, GradesDAO gradesDAO, AbsencesDAO absencesDAO, ExamsDAO examsDAO, AuthService authService) {
+public record AppController(
+		UsersDAO usersDAO,
+		GradesDAO gradesDAO,
+		AbsencesDAO absencesDAO,
+		ExamsDAO examsDAO,
+		AuthService authService
+) {
 
 	public void routeUser(User user) {
-
 		switch (user.getRole()) {
-			case STUDENT:
-				Student student = (Student) user;
-				StudentService serviceS = new StudentService(student);
-
-				System.out.println("Welcome, " + student.getFullName() + "!");
-				while (true) {
-					System.out.println("\nStudent Menu:");
-					System.out.println("1. View Grades");
-					System.out.println("2. View Absences");
-					System.out.println("3. View Upcoming Exams");
-					System.out.println("4. Logout");
-					int choice = InputUtil.readInt("Enter your choice: ", 1, 4);
-					switch (choice) {
-						case 1:
-							List<Grade> grades = serviceS.getGrades();
-							if (grades.isEmpty()) {
-								System.out.println("You currently don't have any grades.");
-								break;
-							}
-							System.out.println("Your current grades are: ");
-							for (Grade grade : grades) {
-								System.out.println(grade.subjectName() + ":" + grade.grade());
-							}
-							break;
-						case 2:
-							List<Absence> absences = serviceS.getAbsences();
-							if (absences.isEmpty()) {
-								System.out.println("You currently don't have any absences.");
-								break;
-							}
-							System.out.println("Your current absences are: ");
-							for (Absence absence : absences) {
-								System.out.println("On " + absence.date() + " from " + absence.teacher());
-							}
-							break;
-						case 3:
-							List<Exam> exams = serviceS.getUpcomingExams();
-							if (exams.isEmpty()) {
-								System.out.println("You currently don't have any upcoming exams.");
-								break;
-							}
-							System.out.println("Your current upcoming exams are: ");
-							for (Exam exam : exams) {
-								System.out.println("On " + exam.date() + " with " + exam.teacher());
-							}
-							break;
-						case 4:
-							System.out.println("Logging out...");
-							return;
-					}
-				}
-			case TEACHER:
-				Teacher teacher = (Teacher) user;
-				TeacherService serviceT = new TeacherService(teacher);
-
-				System.out.println("Welcome, " + teacher.getFullName() + "!");
-				while (true) {
-					System.out.println("\nTeacher Menu:");
-					System.out.println("1. Assign Grade");
-					System.out.println("2. Add Absence");
-					System.out.println("3. Announce Exam");
-					System.out.println("4. Logout");
-					int choice = InputUtil.readInt("Enter your choice: ", 1, 3);
-					switch (choice) {
-						case 1:
-							Student studentG = (Student) usersDAO.findUserInDAO(readInput("Enter student name: "));
-
-							LocalDate dateG = null;
-							while (dateG == null) {
-								try {
-									dateG = parseDate(readInput("Enter date: "));
-								} catch (Exception e) {
-									System.out.println("Invalid date. Please try again.");
-								}
-							}
-
-							Grade grade = toGrade(readInput("Enter grade: "), teacher, readInput("Enter subject name: "), dateG);
-							serviceT.assignGrade(studentG, grade);
-							break;
-						case 2:
-							Student studentA = (Student) usersDAO.findUserInDAO(readInput("Enter student name: "));
-							LocalDate dateA = null;
-							while (dateA == null) {
-								try {
-									dateA = parseDate(readInput("Enter date: "));
-								} catch (Exception e) {
-									System.out.println("Invalid date. Please try again.");
-								}
-							}
-
-							Absence absence = new Absence(dateA, teacher);
-							serviceT.addAbsence(studentA, absence);
-							break;
-						case 3:
-							LocalDate dateE = null;
-							while (dateE == null) {
-								try {
-									dateE = parseDate(readInput("Enter date: "));
-								} catch (Exception e) {
-									System.out.println("Invalid date. Please try again.");
-								}
-							}
-
-							Student studentE = (Student) usersDAO.findUserInDAO(readInput("Enter student name: "));
-							Exam exam = new Exam(dateE, readInput("Enter subject name: "), teacher);
-							serviceT.announceExam(studentE, exam);
-							break;
-						case 4:
-							System.out.println("Logging out...");
-							return;
-					}
-				}
-			case ADMIN:
-				Admin admin = (Admin) user;
-				AdminService serviceA = new AdminService(admin);
-
-				System.out.println("Welcome, " + admin.getFullName() + "!");
-
-				while (true) {
-					System.out.println("\nAdmin Menu:");
-					System.out.println("1. Fire teacher");
-					System.out.println("2. Expel Student");
-					System.out.println("3. Modify Grade");
-					System.out.println("4. Revoke Absence");
-					System.out.println("5. Change Entry Code");
-					System.out.println("6. Logout");
-					int choice = InputUtil.readInt("Enter your choice: ", 1, 4);
-					switch (choice) {
-						case 1:
-							Teacher teacherF = (Teacher) usersDAO.findUserInDAO(readInput("Enter teacher name: "));
-							serviceA.fireTeacher(teacherF);
-							System.out.println("Teacher fired!");
-							break;
-						case 2:
-							Student studentE = (Student) usersDAO.findUserInDAO(readInput("Enter student name: "));
-							serviceA.expelStudent(studentE);
-							System.out.println("Student expelled!");
-							break;
-						case 3:
-							Student studentG = (Student) usersDAO.findUserInDAO(readInput("Enter student name: "));
-							Teacher teacherG = (Teacher) usersDAO.findUserInDAO(readInput("Enter teacher name: "));
-							GRADE_VALUE oldGrade = GRADE_VALUE.valueOf(InputUtil.readInput("Enter old grade: "));
-							GRADE_VALUE newGrade = GRADE_VALUE.valueOf(InputUtil.readInput("Enter new grade: "));
-							Grade oldGradeObj = studentG.getGrade(oldGrade, teacherG);
-							serviceA.changeStudentGrade(studentG, oldGradeObj, new Grade(newGrade, teacherG, oldGradeObj.subjectName(), oldGradeObj.date()));
-							System.out.println("Grade modified!");
-							break;
-						case 4:
-							Student studentA = (Student) usersDAO.findUserInDAO(readInput("Enter student name: "));
-							Teacher teacherA = (Teacher) usersDAO.findUserInDAO(readInput("Enter teacher name: "));
-							Absence absenceA = new Absence(parseDate(readInput("Enter date: ")), teacherA);
-							serviceA.revokeStudentAbsence(studentA, absenceA);
-							System.out.println("Absence revoked!");
-							break;
-						case 5:
-							Student studentCE = (Student) usersDAO.findUserInDAO(readInput("Enter student name: "));
-							String newEntryCode = serviceA.changeStudentEntryCode(studentCE);
-							System.out.println("Entry code changed to "+ newEntryCode + "!");
-							break;
-						case 6:
-							System.out.println("Logging out...");
-							return;
-					}
-				}
-			case PRINCIPAL:
-				Principal principal = (Principal) user;
-				PrincipalService serviceP = new PrincipalService(principal);
-
-				while (true) {
-					System.out.println("\nPrincipal Menu:");
-					System.out.println("1. Fire teacher");
-					System.out.println("2. Expel Student");
-					System.out.println("3. Modify Grade");
-					System.out.println("4. Revoke Absence");
-					System.out.println("5. Change Entry Code");
-					System.out.println("6. Make an announcement");
-					System.out.println("7. View All Student Grades");
-					System.out.println("8. View All Student Absences");
-					System.out.println("9. View All Student Upcoming Exams");
-					System.out.println("10. Logout");
-					int choice = InputUtil.readInt("Enter your choice: ", 1, 6);
-					switch (choice) {
-						case 1:
-							Teacher teacherF = (Teacher) usersDAO.findUserInDAO(readInput("Enter teacher name: "));
-							serviceP.fireTeacher(teacherF);
-							System.out.println("Teacher fired!");
-							break;
-						case 2:
-							Student studentE = (Student) usersDAO.findUserInDAO(readInput("Enter student name: "));
-							serviceP.expelStudent(studentE);
-							System.out.println("Student expelled!");
-							break;
-						case 3:
-							Student studentG = (Student) usersDAO.findUserInDAO(readInput("Enter student name: "));
-							Teacher teacherG = (Teacher) usersDAO.findUserInDAO(readInput("Enter teacher name: "));
-							GRADE_VALUE oldGrade = GRADE_VALUE.valueOf(InputUtil.readInput("Enter old grade: "));
-							GRADE_VALUE newGrade = GRADE_VALUE.valueOf(InputUtil.readInput("Enter new grade: "));
-							Grade oldGradeObj = studentG.getGrade(oldGrade, teacherG);
-							serviceP.changeStudentGrade(studentG, oldGradeObj, new Grade(newGrade, teacherG, oldGradeObj.subjectName(), oldGradeObj.date()));
-							System.out.println("Grade modified!");
-							break;
-						case 4:
-							Student studentA = (Student) usersDAO.findUserInDAO(readInput("Enter student name: "));
-							Teacher teacherA = (Teacher) usersDAO.findUserInDAO(readInput("Enter teacher name: "));
-							Absence absenceA = new Absence(parseDate(readInput("Enter date: ")), teacherA);
-							serviceP.revokeStudentAbsence(studentA, absenceA);
-							System.out.println("Absence revoked!");
-							break;
-						case 5:
-							Student studentCE = (Student) usersDAO.findUserInDAO(readInput("Enter student name: "));
-							String newEntryCode = serviceP.changeStudentEntryCode(studentCE);
-							System.out.println("Entry code changed to "+ newEntryCode + "!");
-							break;
-						case 6:
-							String announcement = readInput("Enter announcement: ");
-							Role role = Role.valueOf(readInput("To which group? "));
-							serviceP.announceTo(role, announcement);
-							break;
-						case 7:
-							Map<Student, List<Grade>> grades = serviceP.getAllGrades();
-							for (Map.Entry<Student, List<Grade>> entry : grades.entrySet()) {
-								System.out.println(entry.getKey().getFullName() + ": ");
-								for (Grade grade : entry.getValue()) {
-									System.out.println("   " + grade.subjectName() + ": " + grade.grade());
-								}
-							}
-							break;
-						case 8:
-							Map<Student, List<Absence>> absences = serviceP.getAllAbsences();
-							for (Map.Entry<Student, List<Absence>> entry : absences.entrySet()) {
-								System.out.println(entry.getKey().getFullName() + ": ");
-								for (Absence absence : entry.getValue()) {
-									System.out.println("   " + absence.date() + " from " + absence.teacher());
-								}
-							}
-							break;
-						case 9:
-							Map<Student, List<Exam>> exams = serviceP.getAllUpcomingExams();
-							for (Map.Entry<Student, List<Exam>> entry : exams.entrySet()) {
-								System.out.println(entry.getKey().getFullName() + ": ");
-								for (Exam exam : entry.getValue()) {
-									System.out.println("   " + exam.date() + " with " + exam.teacher());
-								}
-							}
-							break;
-						case 10:
-							System.out.println("Logging out...");
-							return;
-					}
-				}
-			default:
-				System.out.println("Unknown role. Cannot route user.");
+			case STUDENT -> handleStudent((Student) user);
+			case TEACHER -> handleTeacher((Teacher) user);
+			case ADMIN -> handleAdmin((Admin) user);
+			case PRINCIPAL -> handlePrincipal((Principal) user);
+			default -> System.out.println("Unknown role. Cannot route user.");
 		}
+	}
+
+	// ==================== STUDENT ====================
+	private void handleStudent(Student student) {
+		StudentService service = new StudentService(student);
+		System.out.println("Welcome, " + student.getFullName() + "!");
+
+		while (true) {
+			printMenu("Student Menu", "View Grades", "View Absences", "View Upcoming Exams", "Logout");
+			int choice = InputUtil.readInt("Enter your choice: ", 1, 4);
+
+			switch (choice) {
+				case 1 -> printGrades(service.getGrades());
+				case 2 -> printAbsences(service.getAbsences());
+				case 3 -> printExams(service.getUpcomingExams());
+				case 4 -> { System.out.println("Logging out..."); return; }
+			}
+		}
+	}
+
+	// ==================== TEACHER ====================
+	private void handleTeacher(Teacher teacher) {
+		TeacherService service = new TeacherService(teacher);
+		System.out.println("Welcome, " + teacher.getFullName() + "!");
+
+		while (true) {
+			printMenu("Teacher Menu", "Assign Grade", "Add Absence", "Announce Exam", "Remove Grade", "Cancel Exam", "Logout");
+			int choice = InputUtil.readInt("Enter your choice: ", 1, 6);
+
+			switch (choice) {
+				case 1 -> assignGrade(service, teacher);
+				case 2 -> addAbsence(service, teacher);
+				case 3 -> announceExam(service, teacher);
+				case 4 -> removeGrade(service, teacher);
+				case 5 -> cancelExam(service, teacher);
+				case 6 -> { System.out.println("Logging out..."); return; }
+			}
+		}
+	}
+
+	// ==================== ADMIN ====================
+	private void handleAdmin(Admin admin) {
+		AdminService service = new AdminService(admin);
+		System.out.println("Welcome, " + admin.getFullName() + "!");
+
+		while (true) {
+			printMenu("Admin Menu", "Fire Teacher", "Expel Student", "Modify Grade", "Revoke Absence", "Change Entry Code", "Logout");
+			int choice = InputUtil.readInt("Enter your choice: ", 1, 6);
+
+			switch (choice) {
+				case 1 -> fireTeacher(service);
+				case 2 -> expelStudent(service);
+				case 3 -> modifyGrade(service);
+				case 4 -> revokeAbsence(service);
+				case 5 -> changeEntryCode(service);
+				case 6 -> { System.out.println("Logging out..."); return; }
+			}
+		}
+	}
+
+	// ==================== PRINCIPAL ====================
+	private void handlePrincipal(Principal principal) {
+		PrincipalService service = new PrincipalService(principal);
+		System.out.println("Welcome, " + principal.getFullName() + "!");
+
+		while (true) {
+			printMenu("Principal Menu",
+					"Fire Teacher", "Expel Student", "Modify Grade", "Revoke Absence",
+					"Change Entry Code", "Make Announcement", "View All Grades", "View All Absences",
+					"View All Exams", "Logout"
+			);
+
+			int choice = InputUtil.readInt("Enter your choice: ", 1, 10);
+
+			switch (choice) {
+				case 1 -> fireTeacher(service);
+				case 2 -> expelStudent(service);
+				case 3 -> modifyGrade(service);
+				case 4 -> revokeAbsence(service);
+				case 5 -> changeEntryCode(service);
+				case 6 -> makeAnnouncement(service);
+				case 7 -> viewAllGrades(service);
+				case 8 -> viewAllAbsences(service);
+				case 9 -> viewAllExams(service);
+				case 10 -> { System.out.println("Logging out..."); return; }
+			}
+		}
+	}
+
+	// ==================== HELPER METHODS ====================
+
+	private void printMenu(String title, String... options) {
+		System.out.println("\n" + title + ":");
+		for (int i = 0; i < options.length; i++) {
+			System.out.println((i + 1) + ". " + options[i]);
+		}
+	}
+
+	private void printGrades(List<Grade> grades) {
+		if (grades.isEmpty()) System.out.println("No grades available.");
+		else grades.forEach(g -> System.out.println(g.subjectName() + ": " + g.grade()));
+	}
+
+	private void printAbsences(List<Absence> absences) {
+		if (absences.isEmpty()) System.out.println("No absences.");
+		else absences.forEach(a -> System.out.println("On " + a.date() + " from " + a.teacher()));
+	}
+
+	private void printExams(List<Exam> exams) {
+		if (exams.isEmpty()) System.out.println("No upcoming exams.");
+		else exams.forEach(e -> System.out.println("On " + e.date() + " with " + e.teacher()));
+	}
+
+	private Student readStudent() {
+		return (Student) usersDAO.findUserInDAO(readInput("Enter student name: "));
+	}
+
+	private Teacher readTeacher() {
+		return (Teacher) usersDAO.findUserInDAO(readInput("Enter teacher name: "));
+	}
+
+	private LocalDate readDate() {
+		while (true) {
+			try {
+				return parseDate(readInput("Enter date: "));
+			} catch (Exception e) {
+				System.out.println("Invalid date. Try again.");
+			}
+		}
+	}
+
+	// ==================== TEACHER ACTIONS ====================
+	private void assignGrade(TeacherService service, Teacher teacher) {
+		Student student = readStudent();
+		LocalDate date = readDate();
+		Grade grade = toGrade(readInput("Enter grade: "), teacher, readInput("Enter subject name: "), date);
+		service.assignGrade(student, grade);
+		System.out.println("Grade " + grade.grade() + " assigned to " + student.getFullName());
+	}
+
+	private void addAbsence(TeacherService service, Teacher teacher) {
+		Student student = readStudent();
+		LocalDate date = readDate();
+		Absence absence = new Absence(date, teacher);
+		service.addAbsence(student, absence);
+		System.out.println("Absence added to " + student.getFullName());
+	}
+
+	private void announceExam(TeacherService service, Teacher teacher) {
+		Student student = readStudent();
+		LocalDate date = readDate();
+		Exam exam = new Exam(date, readInput("Enter subject name: "), teacher);
+		service.announceExam(student, exam);
+		System.out.println("Exam announced for " + student.getFullName());
+	}
+
+	private void removeGrade(TeacherService service, Teacher teacher) {
+		Student student = readStudent();
+		LocalDate date = readDate();
+		Grade grade = new Grade(GRADE_VALUE.valueOf(readInput("Enter grade: ")), teacher, readInput("Enter subject name: "), date);
+		service.removeGrade(student, grade);
+		System.out.println("Grade removed from " + student.getFullName());
+	}
+
+	private void cancelExam(TeacherService service, Teacher teacher) {
+		Student student = readStudent();
+		Exam exam = new Exam(readDate(), readInput("Enter subject name: "), teacher);
+		service.cancelExam(student, exam);
+		System.out.println("Exam cancelled for " + student.getFullName());
+	}
+
+	// ==================== ADMIN/PRINCIPAL ACTIONS ====================
+	private void fireTeacher(Object service) {
+		Teacher teacher = readTeacher();
+		if (service instanceof AdminService adminService) {
+			adminService.fireTeacher(teacher);
+		} else if (service instanceof PrincipalService principalService) {
+			principalService.fireTeacher(teacher);
+		}
+	}
+
+	private void expelStudent(Object service) {
+		Student student = readStudent();
+		if (service instanceof AdminService adminService) {
+			adminService.expelStudent(student);
+		} else if (service instanceof PrincipalService principalService) {
+			principalService.expelStudent(student);
+		}
+	}
+
+	private void modifyGrade(Object service) {
+		Student student = readStudent();
+		Teacher teacher = readTeacher();
+		GRADE_VALUE oldGrade = GRADE_VALUE.valueOf(readInput("Enter old grade: "));
+		GRADE_VALUE newGrade = GRADE_VALUE.valueOf(readInput("Enter new grade: "));
+		Grade oldGradeObj = student.getGrade(oldGrade, teacher);
+		if (service instanceof AdminService adminService) {
+			adminService.changeStudentGrade(student, oldGradeObj,
+					new Grade(newGrade, teacher, oldGradeObj.subjectName(), oldGradeObj.date()));
+		} else if (service instanceof PrincipalService principalService) {
+			principalService.changeStudentGrade(student, oldGradeObj,
+					new Grade(newGrade, teacher, oldGradeObj.subjectName(), oldGradeObj.date()));
+		}
+	}
+
+	private void revokeAbsence(Object service) {
+		Student student = readStudent();
+		Teacher teacher = readTeacher();
+		Absence absence = new Absence(readDate(), teacher);
+		if (service instanceof AdminService adminService) {
+			adminService.revokeStudentAbsence(student, absence);
+		} else if (service instanceof PrincipalService principalService) {
+			principalService.revokeStudentAbsence(student, absence);
+		}
+	}
+
+	private void changeEntryCode(Object service) {
+		Student student = readStudent();
+		String newEntryCode = "";
+		if (service instanceof AdminService adminService) {
+			newEntryCode = adminService.changeStudentEntryCode(student);
+		} else if (service instanceof PrincipalService principalService) {
+			newEntryCode = principalService.changeStudentEntryCode(student);
+		}
+		System.out.println("Entry code changed to " + newEntryCode + ". Don't forget it!");
+	}
+
+	// Principal-specific
+	private void makeAnnouncement(PrincipalService service) {
+		String announcement = readInput("Enter announcement: ");
+		Role role = Role.valueOf(readInput("To which group? "));
+		service.announceTo(role, announcement);
+		System.out.println("Announcement sent!");
+	}
+
+	private void viewAllGrades(PrincipalService service) {
+		Map<Student, List<Grade>> grades = service.getAllGrades();
+		grades.forEach((s, gList) -> {
+			System.out.println(s.getFullName() + ": ");
+			gList.forEach(g -> System.out.println("   " + g.subjectName() + ": " + g.grade()));
+		});
+	}
+
+	private void viewAllAbsences(PrincipalService service) {
+		Map<Student, List<Absence>> absences = service.getAllAbsences();
+		absences.forEach((s, aList) -> {
+			System.out.println(s.getFullName() + ": ");
+			aList.forEach(a -> System.out.println("   " + a.date() + " from " + a.teacher()));
+		});
+	}
+
+	private void viewAllExams(PrincipalService service) {
+		Map<Student, List<Exam>> exams = service.getAllUpcomingExams();
+		exams.forEach((s, eList) -> {
+			System.out.println(s.getFullName() + ": ");
+			eList.forEach(e -> System.out.println("   " + e.date() + " with " + e.teacher()));
+		});
 	}
 }

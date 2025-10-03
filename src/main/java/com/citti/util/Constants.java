@@ -27,6 +27,14 @@ public class Constants {
 		STUDENT,
 		PRINCIPAL
 	}
+
+	public enum SERVICE {
+		AdminService,
+		TeacherService,
+		StudentService,
+		PrincipalService
+	}
+
 	public static final int INVALID_INPUT = -50;
 	public static final LocalDate INVALID_DATE = null;
 	public static final String DATE_FORMAT = "yyyy-MM-dd";

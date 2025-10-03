@@ -1,5 +1,8 @@
 package com.citti.model;
 
+import com.citti.dataAccessObj.AbsencesDAO;
+import com.citti.dataAccessObj.ExamsDAO;
+import com.citti.dataAccessObj.GradesDAO;
 import com.citti.dataAccessObj.UsersDAO;
 import com.citti.util.Constants.Role;
 import com.citti.util.LoginInfo;
@@ -21,7 +24,7 @@ public class Principal extends Admin {
 		Map<Student, List<Grade>> studentGrades = new HashMap<>();
 		for (User user : usersDAO.getAllUsers()) {
 			if (user instanceof Student student) {
-				studentGrades.put(student, student.getGrades());
+				studentGrades.put(student, GradesDAO.getInstance().getGradesForStudent(student));
 			}
 		}
 		return studentGrades;
@@ -31,7 +34,7 @@ public class Principal extends Admin {
 		Map<Student, List<Absence>> studentAbsences = new HashMap<>();
 		for (User user : usersDAO.getAllUsers()) {
 			if (user instanceof Student student) {
-				studentAbsences.put(student, student.getAbsences());
+				studentAbsences.put(student, AbsencesDAO.getInstance().getAbsencesForStudent(student));
 			}
 		}
 		return studentAbsences;
@@ -41,7 +44,7 @@ public class Principal extends Admin {
 		Map<Student, List<Exam>> studentExams = new HashMap<>();
 		for (User user : usersDAO.getAllUsers()) {
 			if (user instanceof Student student) {
-				studentExams.put(student, student.getUpcomingExams());
+				studentExams.put(student, ExamsDAO.getInstance().getExamsForStudent(student));
 			}
 		}
 		return studentExams;
