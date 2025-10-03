@@ -83,7 +83,6 @@ public class Main {
 					System.out.println("Press any key to continue...");
 					int _ = System.in.read();
 
-					System.out.println(fullNameClean);
 					User loggedInUser = usersDAO.findUserInDAO(fullNameClean);
 					appController.routeUser(loggedInUser);
 				} else { // existing user
