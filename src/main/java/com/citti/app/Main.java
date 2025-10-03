@@ -18,10 +18,10 @@ public class Main {
 	public static void main(String[] args) {
 
 		// Initialize DAOs
-		UsersDAO usersDAO = new UsersDAO();
-		GradesDAO gradesDAO = new GradesDAO();
-		AbsencesDAO absencesDAO = new AbsencesDAO();
-		ExamsDAO examsDAO = new ExamsDAO();
+		UsersDAO usersDAO = UsersDAO.getInstance();
+		GradesDAO gradesDAO = GradesDAO.getInstance();
+		AbsencesDAO absencesDAO = AbsencesDAO.getInstance();
+		ExamsDAO examsDAO = ExamsDAO.getInstance();
 
 		// Initialize AuthService
 		AuthService authService = new AuthService(usersDAO);
@@ -30,6 +30,7 @@ public class Main {
 		AppController appController = new AppController(usersDAO, gradesDAO, absencesDAO, examsDAO, authService);
 
 		while (true) {
+			System.out.println("Saving..");
 			AbsencesDAO.getInstance().saveToFile();
 			ExamsDAO.getInstance().saveToFile();
 			GradesDAO.getInstance().saveToFile();
@@ -52,6 +53,7 @@ public class Main {
 
 					System.out.println("Registered successfully! ");
 					System.out.println("Entry code: " + entryCode + " DON'T FORGET!");
+					UsersDAO.getInstance().saveToFile();
 				} else {
 						String fullName = InputUtil.readInput("Enter full name: ");
 						String entryCode = InputUtil.readInput("Enter entry code: ");

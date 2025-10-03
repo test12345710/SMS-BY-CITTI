@@ -1,1 +1,24 @@
-{}
+[
+  {
+    "id": 0,
+    "firstName": "Citti",
+    "lastName": "Dabozo",
+    "role": "STUDENT",
+    "loginInfo": {
+      "hash": "df+ES4gPujycfd3HbYeznqXdn1EI4jE9EgS8rLKdBVY\u003d",
+      "salt": "wEYkJbKaj8HGPjoXOlt6/g\u003d\u003d"
+    },
+    "type": "student"
+  },
+  {
+    "id": 1,
+    "firstName": "Citti",
+    "lastName": "Dabozoo",
+    "role": "TEACHER",
+    "loginInfo": {
+      "hash": "df+ES4gPujycfd3HbYeznqXdn1EI4jE9EgS8rLKdBVY\u003d",
+      "salt": "wEYkJbKaj8HGPjoXOlt6/g\u003d\u003d"
+    },
+    "type": "teacher"
+  }
+]

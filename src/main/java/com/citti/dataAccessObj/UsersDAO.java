@@ -2,16 +2,14 @@ package com.citti.dataAccessObj;
 
 import com.citti.model.*;
 import com.citti.util.Constants.Role;
-import com.citti.util.GsonUtil;
 import com.citti.util.LoginInfo;
 import com.citti.util.SecurityUtil;
+import com.citti.util.UserWrapper;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import com.google.gson.GsonBuilder;
 
+import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,36 +22,29 @@ public class UsersDAO {
 	private Map<String, User> users = new HashMap<>();
 	private static final String FILE_PATH = "data/users.json";
 
-	private final Gson gson = GsonUtil.gson;
-
 	public UsersDAO() {
 		loadFromFile();
 	}
 
 	public void saveToFile() {
-		String json = gson.toJson(users);
+		List<UserWrapper> wrapped = users.values().stream()
+				.map(UserWrapper::new)
+				.toList();
 		try (FileWriter writer = new FileWriter(FILE_PATH)) {
-			writer.write(json);
-			System.out.println(json);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+			new GsonBuilder().setPrettyPrinting().create().toJson(wrapped, writer);
+		} catch (Exception e) { e.printStackTrace(); }
 	}
 
 	public void loadFromFile() {
-		try {
-			if (Files.exists(Paths.get(FILE_PATH))) {
-				String json = new String(Files.readAllBytes(Paths.get(FILE_PATH)));
-				Map<String, User> loadedUsers = gson.fromJson(
-						json, new TypeToken<Map<String, User>>(){}.getType()
-				);
-				if (loadedUsers != null) {
-					users = loadedUsers;
-				}
+		Map<String, User> map = new HashMap<>();
+		try (FileReader reader = new FileReader(FILE_PATH)) {
+			UserWrapper[] wrapped = new Gson().fromJson(reader, UserWrapper[].class);
+			for (UserWrapper uw : wrapped) {
+				User u = uw.toUser();
+				map.put(u.getFullName(), u);
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		} catch (Exception e) { e.printStackTrace(); }
+		if (map != null) users = map;
 	}
 
 	public void addUserToDAO(User user, Role role, String entryCode) {
@@ -71,6 +62,7 @@ public class UsersDAO {
 			default -> throw new IllegalArgumentException("Invalid role: " + role);
 		}
 
+		System.out.println(userToStore);
 		users.put(user.getFullName(), userToStore);
 	}
 

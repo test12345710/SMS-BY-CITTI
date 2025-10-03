@@ -1,16 +1,21 @@
 package com.citti.dataAccessObj;
 
-import com.citti.model.Exam;
 import com.citti.model.Grade;
 import com.citti.model.Student;
-import com.citti.util.GsonUtil;
+import com.citti.model.Teacher;
+import com.citti.util.Constants.GRADE_VALUE;
+import com.citti.util.Constants.Role;
+import com.citti.util.LocalDateAdapter;
+import com.citti.util.LoginInfo;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
+import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.lang.reflect.Type;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,51 +24,55 @@ import java.util.Map;
 public class GradesDAO {
 
 	private static final GradesDAO instance = new GradesDAO();
-	private Map<Student, List<Grade>> grades = new HashMap<>();
+	private Map<Integer, List<Grade>> grades = new HashMap<>();
 	private static final String FILE_PATH = "data/grades.json";
 
-	private final Gson gson = GsonUtil.gson;
+	private final Gson gson = new GsonBuilder().registerTypeAdapter(LocalDate.class, new LocalDateAdapter()).setPrettyPrinting().create();
 
 	public GradesDAO() {
 		loadFromFile();
+
+		addGradeToDAO((Student) UsersDAO.getInstance().findUserInDAO("Citti Dabozo"), new Grade(GRADE_VALUE.A, new Teacher("John", "Doe",
+				Role.TEACHER,
+				new LoginInfo("john", "123")), "Math", LocalDate.now()));
 	}
 
 	public void saveToFile() {
-		String json = gson.toJson(grades);
 		try (FileWriter writer = new FileWriter(FILE_PATH)) {
-			writer.write(json);
-		} catch (IOException e) {
+			gson.toJson(grades, writer);
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
 	public void loadFromFile() {
-		try {
-			String json = new String(Files.readAllBytes(Paths.get(FILE_PATH)));
-			grades = gson.fromJson(json, new TypeToken<Map<Student, List<Grade>>>(){}.getType());
-		} catch (IOException e) {
+		try (FileReader reader = new FileReader(FILE_PATH)) {
+			Type type = new TypeToken<Map<Integer, List<Grade>>>(){}.getType();
+			Map<Integer, List<Grade>> loaded = gson.fromJson(reader, type);
+			if (loaded != null) grades = loaded;
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
 	public void addGradeToDAO(Student student, Grade grade) {
 		student.addGrade(grade);
-		grades.put(student, student.getGrades());
+		grades.put(student.getId(), new ArrayList<>(student.getGrades()));
 	}
 
 	public void removeGradeFromDAO(Student student, Grade grade) {
 		student.removeGrade(grade);
-		grades.remove(student);
+		grades.remove(student.getId());
 	}
 
 	public List<Grade> getGradesForStudent(Student student) {
-		return grades.get(student);
+		return grades.get(student.getId());
 	}
 
 	public void updateGradeInDAO(Student student, Grade oldGrade, Grade newGrade) {
 		student.removeGrade(oldGrade);
 		student.addGrade(newGrade);
-		grades.put(student, student.getGrades());
+		grades.put(student.getId(), student.getGrades());
 
 	}
 

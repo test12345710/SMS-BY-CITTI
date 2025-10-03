@@ -1,23 +1,19 @@
 package com.citti.util;
 
-import com.google.gson.*;
-
-import java.lang.reflect.Type;
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
+import java.io.IOException;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 
-public class LocalDateAdapter implements JsonSerializer<LocalDate>, JsonDeserializer<LocalDate> {
-
-	private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
-
+public class LocalDateAdapter extends TypeAdapter<LocalDate> {
 	@Override
-	public JsonElement serialize(LocalDate date, Type typeOfSrc, JsonSerializationContext context) {
-		return new JsonPrimitive(date.format(formatter));
+	public void write(JsonWriter out, LocalDate value) throws IOException {
+		out.value(value.toString());
 	}
 
 	@Override
-	public LocalDate deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
-			throws JsonParseException {
-		return LocalDate.parse(json.getAsString(), formatter);
+	public LocalDate read(JsonReader in) throws IOException {
+		return LocalDate.parse(in.nextString());
 	}
 }

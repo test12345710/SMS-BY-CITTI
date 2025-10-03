@@ -158,11 +158,11 @@ public record AppController(
 	private LocalDate readDate() {
 		while (true) {
 			try {
-				return parseDate(readInput("Enter date: "));
+				return parseDate(readInput("Enter date (yyyy-MM-dd): "));
 			} catch (Exception e) {
 				System.out.println("Invalid date. Try again.");
 			}
-		}
+		} // bG1f
 	}
 
 	// ==================== TEACHER ACTIONS ====================
