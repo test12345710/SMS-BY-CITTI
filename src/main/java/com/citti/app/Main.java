@@ -1,4 +1,4 @@
-package com.citti;
+package com.citti.app;
 
 public class Main {
 	public static void main(String[] args) {
