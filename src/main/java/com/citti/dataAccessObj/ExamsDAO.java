@@ -12,12 +12,12 @@ public class ExamsDAO {
 	private final Map<Student, List<Exam>> exams = new HashMap<>();
 
 	public void addExamToDAO(Student student, Exam exam) {
-		student.upcoming_exams.add(exam);
-		exams.put(student, student.upcoming_exams);
+		student.addUpcomingExam(exam);
+		exams.put(student, student.getUpcomingExams());
 	}
 
 	public void removeExamFromDAO(Student student, Exam exam) {
-		student.upcoming_exams.remove(exam);
+		student.removeUpcomingExam(exam);
 		exams.remove(student);
 	}
 
