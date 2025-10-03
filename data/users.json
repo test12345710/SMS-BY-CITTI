@@ -1,22 +1,22 @@
 [
   {
-    "id": 0,
+    "id": 3,
     "firstName": "Citti",
     "lastName": "Dabozo",
-    "role": "STUDENT",
+    "role": "TEACHER",
     "loginInfo": {
-      "hash": "mjtNchWb/HL5hkXka4abh3Hfhy9yv1x2Ao0eN7AbqeA\u003d",
-      "salt": "YCMi3ZPMHX6EgfDgy7RuJg\u003d\u003d"
+      "hash": "U3sllIlqzgSMVOcuOzKVdvURPBTZX4ogMQU/OkQCzjc\u003d",
+      "salt": "2flKAtCWwVsZnq/fmYT3Uw\u003d\u003d"
     }
   },
   {
-    "id": 0,
+    "id": 2,
     "firstName": "Citti",
     "lastName": "Dabozoo",
-    "role": "TEACHER",
+    "role": "STUDENT",
     "loginInfo": {
-      "hash": "IW9mH42mDJR6zEw9bbGhZahF+qbM8FAzStVvePDmfrQ\u003d",
-      "salt": "llOBapu4MIYC0o9V+SyFfQ\u003d\u003d"
+      "hash": "USMvODI8fRAZ2UnYE2k2KstfWHtGOpA2+SxcjA3Zu+4\u003d",
+      "salt": "ZwERfei2CN9JUbih2+gLyw\u003d\u003d"
     }
   }
 ]

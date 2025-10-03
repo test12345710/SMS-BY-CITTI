@@ -41,9 +41,11 @@ public class UsersDAO {
 		Map<String, User> map = new HashMap<>();
 		try (FileReader reader = new FileReader(FILE_PATH)) {
 			UserWrapper[] wrapped = new Gson().fromJson(reader, UserWrapper[].class);
-			for (UserWrapper uw : wrapped) {
-				User u = uw.toUser();
-				map.put(u.getFullName(), u);
+			if (wrapped != null) {
+				for (UserWrapper uw : wrapped) {
+					User u = uw.toUser();
+					map.put(u.getFullName(), u);
+				}
 			}
 		} catch (Exception e) { e.printStackTrace(); }
 		users = map;
@@ -54,10 +56,10 @@ public class UsersDAO {
 		LoginInfo loginInfo = user.getLoginInfo();
 		Role role = user.getRole();
 		switch (role) {
-			case ADMIN -> userToStore = new Admin(user.getFirstName(), user.getLastName(), role, loginInfo);
-			case STUDENT -> userToStore = new Student(user.getFirstName(), user.getLastName(), role, loginInfo);
-			case TEACHER -> userToStore = new Teacher(user.getFirstName(), user.getLastName(), role, loginInfo);
-			case PRINCIPAL -> userToStore = new Principal(user.getFirstName(), user.getLastName(), role, loginInfo);
+			case ADMIN -> userToStore = new Admin(user.getId(), user.getFirstName(), user.getLastName(), role, loginInfo);
+			case STUDENT -> userToStore = new Student(user.getId(), user.getFirstName(), user.getLastName(), role, loginInfo);
+			case TEACHER -> userToStore = new Teacher(user.getId(), user.getFirstName(), user.getLastName(), role, loginInfo);
+			case PRINCIPAL -> userToStore = new Principal(user.getId(), user.getFirstName(), user.getLastName(), role, loginInfo);
 			default -> throw new IllegalArgumentException("Invalid role: " + role);
 		}
 

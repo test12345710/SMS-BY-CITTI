@@ -14,8 +14,8 @@ public class Admin extends User {
 	private final GradesDAO gradesDAO = GradesDAO.getInstance();
 	private final AbsencesDAO absencesDAO = AbsencesDAO.getInstance();
 
-	public Admin(String firstName, String lastName, Role role, LoginInfo loginInfo) {
-		super(firstName, lastName, role, loginInfo);
+	public Admin(int id, String firstName, String lastName, Role role, LoginInfo loginInfo) {
+		super(id, firstName, lastName, role, loginInfo);
 	}
 
 	public void fireTeacher(Teacher teacher) {

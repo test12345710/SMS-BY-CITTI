@@ -16,8 +16,8 @@ public class Principal extends Admin {
 
 	private final UsersDAO usersDAO = UsersDAO.getInstance();
 
-	public Principal(String firstName, String lastName, Role role, LoginInfo loginInfo) {
-		super(firstName, lastName, role, loginInfo);
+	public Principal(int id, String firstName, String lastName, Role role, LoginInfo loginInfo) {
+		super(id, firstName, lastName, role, loginInfo);
 	}
 
 	public Map<Student, List<Grade>> getAllGrades() {

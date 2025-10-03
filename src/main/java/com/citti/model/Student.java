@@ -14,8 +14,8 @@ public class Student extends User {
 	private final List<Absence> absences = new ArrayList<>();
 	private final List<Exam> upcoming_exams = new ArrayList<>();
 
-	public Student(String firstName, String lastName, Role role, LoginInfo loginInfo) {
-		super(firstName, lastName, role, loginInfo);
+	public Student(int id, String firstName, String lastName, Role role, LoginInfo loginInfo) {
+		super(id, firstName, lastName, role, loginInfo);
 	}
 
 	public List<Grade> getGrades() { return grades; }

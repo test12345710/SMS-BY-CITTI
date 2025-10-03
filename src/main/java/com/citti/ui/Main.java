@@ -54,12 +54,12 @@ public class Main {
 				System.out.println("=== " + APP_NAME + " ===");
 				String fullName = InputUtil.readInput(TYPE_FULL_NAME_PROMPT);
 
-				if (usersDAO.findUserInDAO(fullName) == null) { // new user
+				if (usersDAO.findUserInDAO(fullName) == null && !fullName.isEmpty()) { // new user
 					System.out.println("Welcome " + fullName + " to our platform!");
 
 					Role role = Role.STUDENT;
 					String entryCode;
-					String fullNameClean = "EMPTY";
+					String fullNameClean = fullName;
 					if (fullName.contains("_")) {
 						fullNameClean = fullName.split("_")[0];
 						role = switch (fullName.split("_")[1]) {
@@ -68,10 +68,10 @@ public class Main {
 							case "PRINCIPAL" -> Role.PRINCIPAL;
 							default -> Role.STUDENT;
 						};
-						entryCode = authService.register(new User(fullNameClean.split(" ")[0], fullNameClean.split(" ")[1], role,
+						entryCode = authService.register(new User(-69, fullNameClean.split(" ")[0], fullNameClean.split(" ")[1], role,
 								new LoginInfo("", "")));
-					} else {
-						entryCode = authService.register(new User(fullName.split(" ")[0], fullName.split(" ")[1], role,
+					} else { //                 placeholder id until it gets assigned (yeah I know funny right)
+						entryCode = authService.register(new User(-69, fullName.split(" ")[0], fullName.split(" ")[1], role,
 								new LoginInfo("", "")));
 					}
 
@@ -81,8 +81,9 @@ public class Main {
 					System.out.println("\nYour assigned entry code is:\n " + entryCode + " \nKeep it somewhere safe and do not forget it!!!\n");
 					UsersDAO.getInstance().saveToFile();
 					System.out.println("Press any key to continue...");
-					System.in.read();
+					int _ = System.in.read();
 
+					System.out.println(fullNameClean);
 					User loggedInUser = usersDAO.findUserInDAO(fullNameClean);
 					appController.routeUser(loggedInUser);
 				} else { // existing user

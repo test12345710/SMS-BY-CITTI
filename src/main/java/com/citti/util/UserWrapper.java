@@ -22,10 +22,10 @@ public class UserWrapper {
 		Role r = Role.valueOf(role);
 		LoginInfo li = loginInfo;
 		return switch (r) {
-			case STUDENT -> new Student(firstName, lastName, r, li);
-			case TEACHER -> new Teacher(firstName, lastName, r, li);
-			case ADMIN -> new Admin(firstName, lastName, r, li);
-			case PRINCIPAL -> new Principal(firstName, lastName, r, li);
+			case STUDENT -> new Student(id, firstName, lastName, r, li);
+			case TEACHER -> new Teacher(id, firstName, lastName, r, li);
+			case ADMIN -> new Admin(id, firstName, lastName, r, li);
+			case PRINCIPAL -> new Principal(id, firstName, lastName, r, li);
 		};
 	}
 }

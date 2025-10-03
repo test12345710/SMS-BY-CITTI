@@ -11,8 +11,8 @@ import java.util.Objects;
 
 public class Teacher extends User {
 
-	public Teacher(String firstName, String lastName, Role role, LoginInfo loginInfo) {
-		super(firstName, lastName, role, loginInfo);
+	public Teacher(int id, String firstName, String lastName, Role role, LoginInfo loginInfo) {
+		super(id, firstName, lastName, role, loginInfo);
 	}
 
 	public void assignGrade(Student student, Grade grade) {
